@@ -21,7 +21,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TextFileSpliter {
+
+	private static final Logger logger = LoggerFactory.getLogger(TextFileSpliter.class);
+
 	private String fileName;
 	private JFrame frame;
 	private JTextField openFile;
@@ -29,12 +35,17 @@ public class TextFileSpliter {
 	private JTextField textLineNumber;
 	private JTextField spliteLineNumber;
 	private Properties props;
-	private int totalcnt = 0;
+	private int totalcnt;
+
 	public static void main(String[] args) {
 
 		TextFileSpliter textFile = new TextFileSpliter();
 		textFile.init();
 		textFile.go();
+		
+		logger.info("info");
+		
+		
 	}
 
 	public void init() {
@@ -43,9 +54,8 @@ public class TextFileSpliter {
 		props = new Properties();
 		try {
 			props.load(is);
-			// System.out.println(props.get("top"));
 		} catch (IOException e) {
-			System.err.println("Load failed");
+			logger.error("Properties Load failed ", e);
 		}
 	}
 
@@ -123,7 +133,7 @@ public class TextFileSpliter {
 			this.textLineNumber.setText(Long.toString(lineCount));
 			in.close();
 		} catch (IOException e) {
-			System.out.println(e);
+			logger.error("textFileLineCount error ", e);
 		}
 	}
 
@@ -161,10 +171,10 @@ public class TextFileSpliter {
 						writer.write(line + "\n");
 						writer.close();
 						fileCount++;
-					
-						if(totalcnt>fileCount)
+
+						if (totalcnt > fileCount)
 							writer = new BufferedWriter(new FileWriter(savePath + "\\" + TextFileSpliter.this.fileName + "-" + String.valueOf(fileCount) + ".txt"));
-					
+
 					} else {
 						writer.write(line + "\n");
 					}
@@ -172,7 +182,7 @@ public class TextFileSpliter {
 				in.close();
 				writer.close();
 			} catch (IOException e) {
-				System.out.println(e);
+				logger.error("spliteFileListener actionPerformed ", e);
 			}
 			TextFileSpliter.this.clear();
 		}
@@ -200,7 +210,7 @@ public class TextFileSpliter {
 				while ((line = in.readLine()) != null) {
 
 					line = line.trim();
-					
+
 					Matcher matcher = pattern.matcher(line);
 
 					if (matcher.find()) {
@@ -212,8 +222,8 @@ public class TextFileSpliter {
 								break;
 							}
 						}
-						
-						if(!exceptFlag){
+
+						if (!exceptFlag) {
 							writer.write(line + "\n");
 						}
 					} else {
@@ -237,6 +247,6 @@ public class TextFileSpliter {
 		this.textLineNumber.setText("");
 		this.spliteLineNumber.setText("");
 		this.fileName = "";
-		this.totalcnt=0;
+		this.totalcnt = 0;
 	}
 }
