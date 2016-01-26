@@ -4,6 +4,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -21,6 +23,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,10 +48,9 @@ public class TextFileSpliter {
 		TextFileSpliter textFile = new TextFileSpliter();
 		textFile.init();
 		textFile.go();
-		
+
 		logger.info("info");
-		
-		
+
 	}
 
 	public void init() {
@@ -197,15 +202,31 @@ public class TextFileSpliter {
 
 			String openPath = TextFileSpliter.this.openFile.getText();
 			String savePath = TextFileSpliter.this.saveDir.getText();
-			Pattern pattern = Pattern.compile("[0-9]");
+			Pattern pattern = Pattern.compile(props.getProperty("exceptRegExp"));
+			BufferedReader in = null;
+			FileOutputStream fos = null;
+			BufferedWriter writer = null;
 			try {
-				BufferedReader in = new BufferedReader(new FileReader(openPath));
+				in = new BufferedReader(new FileReader(openPath));
 				String line = null;
-				BufferedWriter writer = new BufferedWriter(new FileWriter(savePath + "\\" + TextFileSpliter.this.fileName + "-clear" + ".txt"));
-
+				// writer = new BufferedWriter(new FileWriter(savePath + "\\" +
+				// TextFileSpliter.this.fileName + "-clear" + ".txt"));
+				fos = new FileOutputStream(new File(savePath + "\\" + TextFileSpliter.this.fileName + "-clear" + ".xls"));
 				String exceptstext = props.getProperty("except");
 
 				String[] excepts = exceptstext.split("|");
+
+				// 엑셀을 workbook을 만듭니다.
+				HSSFWorkbook wb = new HSSFWorkbook();
+
+				// Sheet를 만들어요. 이름은 Name
+				HSSFSheet sheet = wb.createSheet("test");
+
+				// 앞으로 사용할 row와 cell이에요
+				HSSFRow row = null;
+				HSSFCell cell = null;
+
+				int rownum = 0;
 
 				while ((line = in.readLine()) != null) {
 
@@ -224,17 +245,29 @@ public class TextFileSpliter {
 						}
 
 						if (!exceptFlag) {
-							writer.write(line + "\n");
+							row = sheet.createRow(rownum);
+							cell = row.createCell(1);
+							cell.setCellValue(line);
+							// writer.write(line + "\n");
+							rownum++;
 						}
 					} else {
-						System.out.println("clear " + line);
+						logger.debug("clear " + line);
 					}
 
 				}
-				in.close();
-				writer.close();
+				wb.write(fos);
+
 			} catch (IOException e) {
-				System.out.println(e);
+				logger.error("clearFileListener error ", e);
+			} finally {
+				try {
+					in.close();
+					// writer.close();
+					fos.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 			TextFileSpliter.this.clear();
 		}
