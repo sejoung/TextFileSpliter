@@ -77,6 +77,7 @@ public class TextFileSpliter {
 		JButton saveDirButton = new JButton(props.getProperty("btn"));
 		JButton spliteButton = new JButton(props.getProperty("btn1"));
 		JButton clearButton = new JButton(props.getProperty("btn2"));
+		JButton xlsButton = new JButton(props.getProperty("btn3"));
 		this.openFile = new JTextField(20);
 		this.saveDir = new JTextField(20);
 		this.textLineNumber = new JTextField(20);
@@ -88,8 +89,9 @@ public class TextFileSpliter {
 		openButton.addActionListener(new TextFileSpliter.openDirListener());
 		saveDirButton.addActionListener(new TextFileSpliter.saveDirListener());
 		spliteButton.addActionListener(new TextFileSpliter.spliteFileListener());
-		clearButton.addActionListener(new TextFileSpliter.clearFileListener());
-
+		clearButton.addActionListener(new TextFileSpliter.ClearFileListener());
+		xlsButton.addActionListener(new TextFileSpliter.XlsFileListener());
+		
 		panel.add(openButton);
 		panel.add(this.openFile);
 		panel.add(textFileLineNumber);
@@ -100,9 +102,10 @@ public class TextFileSpliter {
 		panel.add(this.saveDir);
 		panel.add(clearButton);
 		panel.add(spliteButton);
+		panel.add(xlsButton);
 
 		this.frame.getContentPane().add("Center", panel);
-		this.frame.setSize(500, 300);
+		this.frame.setSize(500, 400);
 		this.frame.setVisible(true);
 	}
 
@@ -177,7 +180,7 @@ public class TextFileSpliter {
 						writer.close();
 						fileCount++;
 
-						if (totalcnt > fileCount)
+						if (totalcnt > lineCount)
 							writer = new BufferedWriter(new FileWriter(savePath + "\\" + TextFileSpliter.this.fileName + "-" + String.valueOf(fileCount) + ".txt"));
 
 					} else {
@@ -193,8 +196,8 @@ public class TextFileSpliter {
 		}
 	}
 
-	public class clearFileListener implements ActionListener {
-		public clearFileListener() {
+	public class ClearFileListener implements ActionListener {
+		public ClearFileListener() {
 			super();
 		}
 
@@ -204,29 +207,14 @@ public class TextFileSpliter {
 			String savePath = TextFileSpliter.this.saveDir.getText();
 			Pattern pattern = Pattern.compile(props.getProperty("exceptRegExp"));
 			BufferedReader in = null;
-			FileOutputStream fos = null;
 			BufferedWriter writer = null;
 			try {
 				in = new BufferedReader(new FileReader(openPath));
 				String line = null;
-				// writer = new BufferedWriter(new FileWriter(savePath + "\\" +
-				// TextFileSpliter.this.fileName + "-clear" + ".txt"));
-				fos = new FileOutputStream(new File(savePath + "\\" + TextFileSpliter.this.fileName + "-clear" + ".xls"));
+				writer = new BufferedWriter(new FileWriter(savePath + "\\" + TextFileSpliter.this.fileName + "-clear" + ".txt"));
 				String exceptstext = props.getProperty("except");
 
 				String[] excepts = exceptstext.split("|");
-
-				// 엑셀을 workbook을 만듭니다.
-				HSSFWorkbook wb = new HSSFWorkbook();
-
-				// Sheet를 만들어요. 이름은 Name
-				HSSFSheet sheet = wb.createSheet("test");
-
-				// 앞으로 사용할 row와 cell이에요
-				HSSFRow row = null;
-				HSSFCell cell = null;
-
-				int rownum = 0;
 
 				while ((line = in.readLine()) != null) {
 
@@ -245,25 +233,70 @@ public class TextFileSpliter {
 						}
 
 						if (!exceptFlag) {
-							row = sheet.createRow(rownum);
-							cell = row.createCell(1);
-							cell.setCellValue(line);
-							// writer.write(line + "\n");
-							rownum++;
+							writer.write(line + "\n");
 						}
 					} else {
 						logger.debug("clear " + line);
 					}
 
 				}
-				wb.write(fos);
-
 			} catch (IOException e) {
-				logger.error("clearFileListener error ", e);
+				logger.error("ClearFileListener error ", e);
 			} finally {
 				try {
 					in.close();
-					// writer.close();
+					writer.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			TextFileSpliter.this.clear();
+		}
+
+	}
+
+	public class XlsFileListener implements ActionListener {
+		public XlsFileListener() {
+			super();
+		}
+
+		public void actionPerformed(ActionEvent ev) {
+
+			String openPath = TextFileSpliter.this.openFile.getText();
+			String savePath = TextFileSpliter.this.saveDir.getText();
+			Pattern pattern = Pattern.compile(props.getProperty("exceptRegExp"));
+			BufferedReader in = null;
+			FileOutputStream fos = null;
+			try {
+				in = new BufferedReader(new FileReader(openPath));
+				String line = null;
+				fos = new FileOutputStream(new File(savePath + "\\" + TextFileSpliter.this.fileName + ".xls"));
+
+				HSSFWorkbook wb = new HSSFWorkbook();
+
+				HSSFSheet sheet = wb.createSheet("push");
+
+				HSSFRow row = null;
+				HSSFCell cell = null;
+
+				int rownum = 0;
+
+				while ((line = in.readLine()) != null) {
+
+					line = line.trim();
+					row = sheet.createRow(rownum);
+					cell = row.createCell(1);
+					cell.setCellValue(line);
+					rownum++;
+
+				}
+				wb.write(fos);
+
+			} catch (IOException e) {
+				logger.error("XlsFileListener error ", e);
+			} finally {
+				try {
+					in.close();
 					fos.close();
 				} catch (IOException e) {
 					e.printStackTrace();
