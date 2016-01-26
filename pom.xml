@@ -4,6 +4,9 @@
 	<groupId>kr.co.killers</groupId>
 	<artifactId>TextFileSpliter</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<properties>
+		<deploy.target.dir>target</deploy.target.dir>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
@@ -25,13 +28,52 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<!-- public static void main() 함수가 있는 클래스 지정 -->
 							<mainClass>kr.co.killers.text.TextFileSpliter</mainClass>
-							<!-- jar 파일 META-INF/MANIFEST.MF 에 클래스패스 정보 추가 -->
 							<addClasspath>true</addClasspath>
+							<classpathPrefix>${deploy.target.dir}/lib/</classpathPrefix>
 						</manifest>
 					</archive>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.3</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<outputDirectory>${deploy.target.dir}/lib/</outputDirectory>
+					<overWriteIfNewer>true</overWriteIfNewer>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>attached</goal>
+						</goals>
+						<phase>package</phase>
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<archive>
+								<manifest>
+									<mainClass>kr.co.killers.text.TextFileSpliter</mainClass>
+								</manifest>
+							</archive>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
