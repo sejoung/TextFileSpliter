@@ -264,7 +264,6 @@ public class TextFileSpliter {
 
 			String openPath = TextFileSpliter.this.openFile.getText();
 			String savePath = TextFileSpliter.this.saveDir.getText();
-			Pattern pattern = Pattern.compile(props.getProperty("exceptRegExp"));
 			BufferedReader in = null;
 			FileOutputStream fos = null;
 			try {
