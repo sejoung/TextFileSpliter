@@ -78,6 +78,7 @@ public class TextFileSpliter {
 		JButton spliteButton = new JButton(props.getProperty("btn1"));
 		JButton clearButton = new JButton(props.getProperty("btn2"));
 		JButton xlsButton = new JButton(props.getProperty("btn3"));
+		JButton folderXlsButton = new JButton(props.getProperty("btn4"));
 		this.openFile = new JTextField(20);
 		this.saveDir = new JTextField(20);
 		this.textLineNumber = new JTextField(20);
@@ -91,6 +92,7 @@ public class TextFileSpliter {
 		spliteButton.addActionListener(new TextFileSpliter.spliteFileListener());
 		clearButton.addActionListener(new TextFileSpliter.ClearFileListener());
 		xlsButton.addActionListener(new TextFileSpliter.XlsFileListener());
+		folderXlsButton.addActionListener(new TextFileSpliter.FolderXlsFileListener());
 		
 		panel.add(openButton);
 		panel.add(this.openFile);
@@ -103,6 +105,7 @@ public class TextFileSpliter {
 		panel.add(clearButton);
 		panel.add(spliteButton);
 		panel.add(xlsButton);
+		panel.add(folderXlsButton);
 
 		this.frame.getContentPane().add("Center", panel);
 		this.frame.setSize(500, 400);
@@ -293,6 +296,73 @@ public class TextFileSpliter {
 
 			} catch (IOException e) {
 				logger.error("XlsFileListener error ", e);
+			} finally {
+				try {
+					in.close();
+					fos.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			TextFileSpliter.this.clear();
+		}
+
+	}
+	
+	
+	public class FolderXlsFileListener implements ActionListener {
+		public FolderXlsFileListener() {
+			super();
+		}
+
+		public void actionPerformed(ActionEvent ev) {
+
+			String savePath = TextFileSpliter.this.saveDir.getText();
+			BufferedReader in = null;
+			FileOutputStream fos = null;
+			try {
+
+				File folder = new File(savePath);
+				
+				if(!folder.isDirectory()){
+					throw new Exception("no folder");
+				}
+				
+				for(File openFile : folder.listFiles()){
+					
+					in = new BufferedReader(new FileReader(openFile));
+					String line = null;
+					fos = new FileOutputStream(new File(savePath + "\\" + openFile.getName() + ".xls"));
+
+					HSSFWorkbook wb = new HSSFWorkbook();
+
+					HSSFSheet sheet = wb.createSheet("push");
+
+					HSSFRow row = null;
+					HSSFCell cell = null;
+
+					int rownum = 0;
+
+					while ((line = in.readLine()) != null) {
+
+						line = line.trim();
+						row = sheet.createRow(rownum);
+						cell = row.createCell(1);
+						cell.setCellValue(line);
+						rownum++;
+
+					}
+					wb.write(fos);
+					
+					in.close();
+					fos.close();
+					openFile.delete();
+				}
+				
+				
+
+			} catch (Exception e) {
+				logger.error("FolderXlsFileListener error ", e);
 			} finally {
 				try {
 					in.close();
