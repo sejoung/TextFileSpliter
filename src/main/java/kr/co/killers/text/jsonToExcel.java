@@ -18,7 +18,9 @@ public class jsonToExcel {
 
     public static void main(String[] args) throws Exception {
         HSSFWorkbook wb = new HSSFWorkbook();
-        FileOutputStream fos = new FileOutputStream(new File("E:\\TEST.xls"));
+        FileOutputStream fos = new FileOutputStream(new File("E:\\CLICK_20170923.xls"));
+        //FileOutputStream fos = new FileOutputStream(new File("E:\\CONVERSION_20170923.xls"));
+
         jsonToExcel jte = new jsonToExcel();
 
         //jte.filelist("E:\\lowdata\\conversion", CommonConstants.CONVERSION,wb,fos);
