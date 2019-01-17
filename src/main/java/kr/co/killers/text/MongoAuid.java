@@ -1,10 +1,22 @@
 package kr.co.killers.text;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -12,9 +24,14 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 public class MongoAuid {
+    private static final Logger logger = LoggerFactory.getLogger(MongoAuid.class);
 
     private static final int COLLECTION_COUNT = 20;
     private static final String COLLECTION_PREFIX = "CIData_";
+
+    private static final String CATE = "cate";
+    private static final String GEN = "gender";
+    private static final String AGE = "age";
 
     private static Map<String, MongoCollection<Document>> collectionMap = new HashMap<>();
 
@@ -83,13 +100,11 @@ public class MongoAuid {
         return collectionName;
     }
 
-    private void run() {
+    private Map<String, String> getData(String auid) {
+        Map<String, String> result = new HashMap<>();
+        MongoClientURI connectionString = new MongoClientURI("mongodb://mongo:10001");
 
-        try {
-
-            MongoClientURI connectionString = new MongoClientURI("mongodb://mongo:10001");
-            MongoClient mongoClient = new MongoClient(connectionString);
-
+        try (MongoClient mongoClient = new MongoClient(connectionString)) {
             MongoDatabase database = mongoClient.getDatabase("userlog");
 
             for (int i = 0; i < 20; i++) {
@@ -97,18 +112,16 @@ public class MongoAuid {
                 collectionMap.put(tempCollectionName, database.getCollection(tempCollectionName));
             }
 
-            String auid = "f850868914fd52e66567176516825d30ee0-2288";
-
             String collectionName = this.getcollectionName(auid);
 
             MongoCollection<Document> collection = collectionMap.get(collectionName);
-
             Document query = new Document().append("_id", auid);
 
             Document document = collection.find(query).first();
             if (document != null) {
-                if (document.get("iKc") != null) {
-                    List<Document> datas = (List) ((Document) document.get("iKc")).get("data");
+                Object ikc = document.get("iKc");
+                if (ikc != null) {
+                    List<Document> datas = (List) ((Document) ikc).get("data");
 
                     StringBuffer sb = new StringBuffer();
                     datas.forEach((data) -> {
@@ -116,31 +129,83 @@ public class MongoAuid {
                         sb.append((this.getName(data.getString("cate")) + " cnt = " + data.get("cnt") + " "));
 
                     });
-                    System.out.println(sb.toString());
+                    result.put(CATE, sb.toString());
                 } else {
-                    System.out.println("카테고리 없음");
+                    result.put(CATE, "카테고리 없음");
+
                 }
 
-                if (document.get("iGender2") != null) {
-                    System.out.println(((Document) document.get("iGender2")).get("data"));
+                Object iGen = document.get("iGender2");
+                if (iGen != null) {
+                    String gender = ((Document) iGen).get("data").toString();
+                    logger.debug(gender);
+                    result.put(GEN, gender);
 
                 } else {
-                    System.out.println("성별 없음");
+                    result.put(GEN, "성별 없음");
+
                 }
 
-                if (document.get("iAge2") != null) {
-                    System.out.println(((Document) document.get("iAge2")).get("data"));
+                Object iAge = document.get("iAge2");
+
+                if (iAge != null) {
+                    String age = ((Document) iAge).get("data").toString();
+                    logger.debug(age);
+                    result.put(AGE, age);
 
                 } else {
-                    System.out.println("나이 없음");
+                    result.put(AGE, "나이 없음");
 
                 }
             } else {
-                System.out.println("널러러러러러러");
+                result.put(CATE, "카테고리 없음");
+                result.put(GEN, "성별 없음");
+                result.put(AGE, "나이 없음");
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+
+    }
+
+    private void run() {
+
+        try (OPCPackage pkg = OPCPackage.open(new File("D://test.xlsx"))) {
+            Workbook workbook = new XSSFWorkbook(pkg);
+   
+            Sheet sheet = workbook.getSheetAt(0);
+
+            for (Row row : sheet) {
+
+
+                Cell auidcell = row.getCell(3);
+                Cell catecell = row.getCell(6);
+                Cell gencell = row.getCell(7);
+                Cell agecell = row.getCell(8);
+
+                String auid = auidcell.getStringCellValue();
+
+                Map<String, String> map = getData(auid);
+                
+                catecell.setCellType(CellType.STRING);
+                catecell.setCellValue(map.get(CATE));
+                
+                gencell.setCellType(CellType.STRING);
+                gencell.setCellValue(map.get(GEN));
+                
+                agecell.setCellType(CellType.STRING);
+                agecell.setCellValue(map.get(AGE));
+
+            }
+            
+            
+            try (OutputStream fileOut = new FileOutputStream("D://workbook.xls")) {
+                workbook.write(fileOut);
             }
 
         } catch (Exception e) {
-            // TODO: handle exception
             e.printStackTrace();
         }
     }

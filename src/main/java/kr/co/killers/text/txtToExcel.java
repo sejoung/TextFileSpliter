@@ -85,11 +85,11 @@ public class txtToExcel {
 
 			HSSFRow row = sheet.createRow(rownum);
 			HSSFCell cell1 = row.createCell(0);
-			cell1.setCellType(HSSFCell.CELL_TYPE_FORMULA);
+			/*cell1.setCellType(HSSFCell.CELL_TYPE_FORMULA);
 			cell1.setCellFormula(mapB.get(key));
 			HSSFCell cell = row.createCell(1);
-			cell.setCellType(HSSFCell.CELL_TYPE_FORMULA);
-			cell.setCellFormula(mapA.get(key));
+			cell.setCellType(HSSFCell.CELL_TYPE_FORMULA);*/
+			//cell.setCellFormula(mapA.get(key));
 			rownum++;
 		}
 		wb.write(fos);

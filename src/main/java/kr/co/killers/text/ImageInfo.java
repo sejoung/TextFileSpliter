@@ -41,7 +41,7 @@ public class ImageInfo {
                     continue;
                 } else {
                     // 타입별로 내용 읽기
-                    switch (cell.getCellType()) {
+                 /*   switch (cell.getCellType()) {
                     case HSSFCell.CELL_TYPE_FORMULA:
                         value = cell.getCellFormula();
                         break;
@@ -57,7 +57,7 @@ public class ImageInfo {
                     case HSSFCell.CELL_TYPE_ERROR:
                         value = cell.getErrorCellValue() + "";
                         break;
-                    }
+                    }*/
                 }
 
                 try {
