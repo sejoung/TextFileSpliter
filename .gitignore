@@ -50,3 +50,9 @@ Temporary Items
 .classpath
 .settings
 /target/
+
+.idea/
+
+*.iml
+
+# End of https://www.gitignore.io/api/intellij+all
