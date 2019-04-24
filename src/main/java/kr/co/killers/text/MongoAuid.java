@@ -41,56 +41,54 @@ public class MongoAuid {
 
     public String getName(String key) {
 
-        switch (key) {
-        case "368":
+        if ("368".equals(key)) {
             return "e스포츠/게임";
-        case "369":
+        } else if ("369".equals(key)) {
             return "IT/인터넷/통신";
-        case "370":
+        } else if ("370".equals(key)) {
             return "건강";
-        case "371":
+        } else if ("371".equals(key)) {
             return "경제";
-        case "372":
+        } else if ("372".equals(key)) {
             return "교육";
-        case "373":
+        } else if ("373".equals(key)) {
             return "금융";
-        case "374":
+        } else if ("374".equals(key)) {
             return "모바일";
-        case "375":
+        } else if ("375".equals(key)) {
             return "문화";
-        case "376":
+        } else if ("376".equals(key)) {
             return "부동산";
-        case "377":
+        } else if ("377".equals(key)) {
             return "사회";
-        case "378":
+        } else if ("378".equals(key)) {
             return "생활";
-        case "379":
+        } else if ("379".equals(key)) {
             return "세계";
-        case "380":
+        } else if ("380".equals(key)) {
             return "스포츠";
-        case "381":
+        } else if ("381".equals(key)) {
             return "엔터테인먼트";
-        case "382":
+        } else if ("382".equals(key)) {
             return "여행";
-        case "383":
+        } else if ("383".equals(key)) {
             return "영화/뮤직";
-        case "384":
+        } else if ("384".equals(key)) {
             return "음식";
-        case "385":
+        } else if ("385".equals(key)) {
             return "자동차";
-        case "386":
+        } else if ("386".equals(key)) {
             return "정치";
-        case "387":
+        } else if ("387".equals(key)) {
             return "종교";
-        case "388":
+        } else if ("388".equals(key)) {
             return "취업";
-        case "389":
+        } else if ("389".equals(key)) {
             return "컴퓨터";
-        case "390":
+        } else if ("390".equals(key)) {
             return "패션/뷰티";
-        default:
-            return "";
         }
+        return "";
 
     }
 
